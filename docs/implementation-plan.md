@@ -9,7 +9,7 @@
 
 **Zadania:**
 - [ ] Konfiguracja Docker Compose (PostgreSQL, Redis, pgAdmin)
-- [ ] Inicjalizacja projektu Next.js 16
+- [ ] Inicjalizacja projektu Astro 5
 - [ ] Konfiguracja TypeScript (strict mode)
 - [ ] Schemat bazy danych (migracje Prisma/TypeORM)
 - [ ] Serwis URL - implementacja endpointu POST /api/shorten
@@ -45,7 +45,7 @@
 
 **Zadania:**
 - [ ] Serwis Analityczny - GET /api/analytics/:short_code
-- [ ] Panel analityczny (React komponenty)
+- [ ] Panel analityczny (React komponenty jako wyspy Astro)
 - [ ] Wykresy (biblioteka: Recharts lub Chart.js)
 - [ ] Filtry zakresów czasowych
 - [ ] Odświeżanie danych co 5 minut

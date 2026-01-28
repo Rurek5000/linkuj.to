@@ -9,7 +9,7 @@
 
 ```
 ┌─────────────────┐
-│   Frontend      │ (Next.js 16)
+│   Frontend      │ (Astro 5)
 │   (React 19)    │
 └────────┬────────┘
          │
@@ -42,8 +42,8 @@
 ### 1.2 Stos Technologiczny
 
 **Frontend:**
-- Next.js 16 (App Router)
-- React 19
+- Astro 5
+- React 19 (dla interaktywnych komponentów)
 - Tailwind CSS 4
 - TypeScript (tryb ścisły)
 
@@ -365,7 +365,7 @@ const rateLimiter = {
 
 - [ ] **Kolejka komunikatów:** Redis Streams (prostsza) vs RabbitMQ (bardziej niezawodna) vs Kafka (overkill dla MVP)
 - [ ] **ORM:** Prisma (nowoczesny, typesafe) vs TypeORM (bardziej dojrzały) vs surowy SQL (najszybszy)
-- [ ] **Hosting frontend:** Vercel (łatwy) vs Railway (all-in-one) vs własny Kubernetes
+- [ ] **Hosting frontend:** Vercel (obsługuje Astro) vs Netlify (obsługuje Astro) vs Cloudflare Pages
 - [ ] **Hosting backend:** Cloud Run (serverless) vs Railway (PaaS) vs Kubernetes (pełna kontrola)
 - [ ] **Monitoring:** Grafana Cloud (open source) vs Datadog (premium) vs CloudWatch (integracja AWS)
 - [ ] **Biblioteka wykresów:** Recharts (React-native) vs Chart.js (popularny) vs D3.js (zaawansowany)
