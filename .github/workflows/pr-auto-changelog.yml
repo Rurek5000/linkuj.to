@@ -1,0 +1,28 @@
+name: Auto-populate PR Changes
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - dev
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  update-pr-description:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Update PR description with commits
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+        run: bash .github/scripts/update-pr-changelog.sh
