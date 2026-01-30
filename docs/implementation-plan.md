@@ -17,9 +17,9 @@
 - [x] Setup `@shortener/redis` - Redis client, cache service, queue service
 
 **Zadania - Infrastruktura:**
-- [ ] Konfiguracja Docker Compose (PostgreSQL, Redis, pgAdmin)
-- [ ] Inicjalizacja projektu Astro 5 w `/apps/web`
-- [ ] Inicjalizacja projektu Express w `/apps/api`
+- [x] Konfiguracja Docker Compose (PostgreSQL, Redis, pgAdmin)
+- [x] Inicjalizacja projektu Astro 5 w `/apps/web`
+- [x] Inicjalizacja projektu Express w `/apps/api`
 - [ ] Schemat bazy danych (migracje w `@shortener/db`)
 - [ ] Konfiguracja workspace dependencies między pakietami
 
