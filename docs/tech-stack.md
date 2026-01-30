@@ -39,18 +39,43 @@
 └──────────────┘  └──────────────┘  └──────────────┘
 ```
 
-### 1.2 Stos Technologiczny
+### 1.2 Architektura Monorepo
+
+**Zarządzanie Projektem:**
+- **pnpm workspaces** - Zarządzanie zależnościami między pakietami
+- **Turborepo** - Orchestracja tasków, caching, równoległe wykonanie
+- **Struktura katalogów:**
+  - `/apps/web` - Aplikacja frontendowa (Astro 5)
+  - `/apps/api` - Mikrousługi backendowe (Express.js)
+  - `/packages/shared` - Współdzielone typy TypeScript, schematy Zod, narzędzia
+  - `/packages/db` - Warstwa abstrakcji bazy danych (Prisma/TypeORM)
+  - `/packages/redis` - Logika cachowania i kolejek Redis
+
+**Koncepcje Kluczowe:**
+- **Single Source of Truth**: Wszystkie typy i schematy walidacji w `/packages/shared`
+- **Type Safety**: Współdzielone typy TypeScript między frontendem a backendem eliminują niezgodności
+- **Dependency Graph**: Turborepo automatycznie buduje pakiety w odpowiedniej kolejności
+- **Build Caching**: Ponowne buildy są znacznie szybsze dzięki cachowaniu Turborepo
+
+### 1.3 Stos Technologiczny
 
 **Frontend:**
 - Astro 5
 - React 19 (dla interaktywnych komponentów)
 - Tailwind CSS 4
 - TypeScript (tryb ścisły)
+- Zod (walidacja formularzy, import z `@shortener/shared`)
 
 **Serwisy Backendowe:**
 - Node.js + TypeScript
-- Framework: Express.js lub Fastify (dla każdego serwisu)
+- Framework: Express.js (dla każdego serwisu)
+- Zod (walidacja requestów, import z `@shortener/shared`)
 - Każdy serwis jako osobne wdrożenie
+
+**Pakiety Współdzielone:**
+- `@shortener/shared` - Typy TypeScript, schematy Zod, stałe, utility functions
+- `@shortener/db` - ORM client (Prisma/TypeORM), modele, migracje
+- `@shortener/redis` - Redis client, cache service, queue service
 
 **Infrastruktura:**
 - PostgreSQL 15+ (trwałe przechowywanie danych)
@@ -61,8 +86,9 @@
 **Wdrożenie:**
 - Docker + Docker Compose (rozwój lokalny)
 - Kubernetes / Cloud Run / Railway (produkcja)
+- Każdy serwis w `/apps` budowany jako osobny kontener Docker
 
-### 1.3 Schemat Bazy Danych
+### 1.4 Schemat Bazy Danych
 
 **PostgreSQL:**
 
@@ -115,7 +141,7 @@ SET short:{short_code} -> original_url (TTL 30 dni)
 XADD clicks * short_code abc123 timestamp 1234567890 country US ip_hash xxx
 ```
 
-### 1.4 Punkty Końcowe API
+### 1.5 Punkty Końcowe API
 
 **Serwis URL:**
 - `POST /api/shorten` - Tworzenie skróconego URL
@@ -136,6 +162,62 @@ XADD clicks * short_code abc123 timestamp 1234567890 country US ip_hash xxx
   - Odpowiedź: `{success: boolean}`
 
 ## 2. Szczegóły Implementacji
+
+### 2.0 Architektura Pakietów Współdzielonych
+
+**Pakiet @shortener/shared:**
+```
+/packages/shared
+  /src
+    /schemas       - Schematy Zod (LinkSchema, AnalyticsEventSchema, etc.)
+    /types         - Typy TypeScript (Link, AnalyticsEvent, etc.)
+    /constants     - Stałe (MAX_RETRIES, CACHE_TTL, etc.)
+    /utils         - Funkcje pomocnicze (generateShortCode, hashIP, etc.)
+  package.json
+  tsconfig.json
+```
+
+**Pakiet @shortener/db:**
+```
+/packages/db
+  /src
+    /client        - Konfiguracja ORM (Prisma/TypeORM)
+    /models        - Definicje modeli
+    /migrations    - Migracje bazy danych
+    /repositories  - Repozytoria (LinkRepository, AnalyticsRepository)
+  package.json
+  tsconfig.json
+```
+
+**Pakiet @shortener/redis:**
+```
+/packages/redis
+  /src
+    /client        - Konfiguracja Redis client
+    /cache         - Cache service (get, set, delete)
+    /queue         - Queue service (publish, consume events)
+  package.json
+  tsconfig.json
+```
+
+**Przykład użycia:**
+```typescript
+// W /apps/api/src/services/url-service.ts
+import { LinkSchema } from '@shortener/shared/schemas';
+import { linkRepository } from '@shortener/db';
+import { cacheService } from '@shortener/redis';
+import { generateShortCode } from '@shortener/shared/utils';
+
+export async function shortenUrl(url: string) {
+  const validated = LinkSchema.parse({ url });
+  const shortCode = generateShortCode();
+
+  const link = await linkRepository.create({ shortCode, url: validated.url });
+  await cacheService.set(`short:${shortCode}`, url, CACHE_TTL);
+
+  return link;
+}
+```
 
 ### 2.1 Serwis Skracania URL
 

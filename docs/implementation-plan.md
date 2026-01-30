@@ -7,16 +7,31 @@
 
 ### Faza 1: Infrastruktura i Podstawowe Serwisy (Tydzień 1-2)
 
-**Zadania:**
-- [ ] Konfiguracja Docker Compose (PostgreSQL, Redis, pgAdmin)
-- [ ] Inicjalizacja projektu Astro 5
-- [ ] Konfiguracja TypeScript (strict mode)
-- [ ] Schemat bazy danych (migracje Prisma/TypeORM)
-- [ ] Serwis URL - implementacja endpointu POST /api/shorten
-- [ ] Generowanie krótkich kodów z obsługą kolizji
-- [ ] Implementacja pamięci podręcznej Redis
+**Zadania - Monorepo Setup:**
+- [x] Inicjalizacja monorepo (pnpm workspaces + Turborepo)
+- [x] Konfiguracja `turbo.json` (pipelines: build, dev, test, lint)
+- [x] Stworzenie struktury katalogów (`/apps/web`, `/apps/api`, `/packages/*`)
+- [x] Konfiguracja TypeScript (strict mode, path aliases)
+- [x] Setup `@shortener/shared` - typy, schematy Zod, utils
+- [x] Setup `@shortener/db` - Prisma/TypeORM, migracje, repozytoria
+- [x] Setup `@shortener/redis` - Redis client, cache service, queue service
 
-**Rezultat:** Działające skracanie URL bez analityki i zabezpieczeń
+**Zadania - Infrastruktura:**
+- [ ] Konfiguracja Docker Compose (PostgreSQL, Redis, pgAdmin)
+- [ ] Inicjalizacja projektu Astro 5 w `/apps/web`
+- [ ] Inicjalizacja projektu Express w `/apps/api`
+- [ ] Schemat bazy danych (migracje w `@shortener/db`)
+- [ ] Konfiguracja workspace dependencies między pakietami
+
+**Zadania - Serwis URL:**
+- [ ] Implementacja `generateShortCode()` w `@shortener/shared/utils`
+- [ ] Schematy Zod w `@shortener/shared/schemas` (LinkSchema)
+- [ ] Link repository w `@shortener/db`
+- [ ] Cache service w `@shortener/redis`
+- [ ] Endpoint POST /api/shorten w `/apps/api`
+- [ ] Obsługa kolizji short codes (retry logic)
+
+**Rezultat:** Działające skracanie URL z pełną architekturą monorepo
 
 ### Faza 2: Przekierowania i Zabezpieczenia (Tydzień 3)
 
