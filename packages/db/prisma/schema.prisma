@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Link {
+  id          Int      @id @default(autoincrement())
+  shortCode   String   @unique @map("short_code") @db.VarChar(60)
+  originalUrl String   @map("original_url") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  expiresAt   DateTime @map("expires_at")
+  isActive    Boolean  @default(true) @map("is_active")
+
+  @@index([shortCode])
+  @@index([expiresAt])
+  @@map("links")
+}
+
+model AnalyticsEvent {
+  id         BigInt   @id @default(autoincrement())
+  shortCode  String   @map("short_code") @db.VarChar(60)
+  clickedAt  DateTime @default(now()) @map("clicked_at")
+  ipHash     String?  @map("ip_hash") @db.VarChar(64)
+  country    String?  @db.VarChar(2)
+  userAgent  String?  @map("user_agent") @db.Text
+
+  @@index([shortCode])
+  @@index([clickedAt])
+  @@map("analytics_events")
+}
+
+model AnalyticsAggregated {
+  id           Int      @id @default(autoincrement())
+  shortCode    String   @map("short_code") @db.VarChar(60)
+  periodStart  DateTime @map("period_start")
+  periodEnd    DateTime @map("period_end")
+  periodType   String   @map("period_type") @db.VarChar(10)
+  clickCount   Int      @default(0) @map("click_count")
+  countriesJson Json?   @map("countries_json")
+
+  @@unique([shortCode, periodStart, periodType])
+  @@index([shortCode, periodStart])
+  @@map("analytics_aggregated")
+}

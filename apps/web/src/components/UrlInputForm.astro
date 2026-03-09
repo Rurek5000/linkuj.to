@@ -1,0 +1,30 @@
+<div
+  id="form-section"
+  class="flex flex-col gap-8 border-2 border-black bg-[#FAFAF8] p-8"
+>
+  <form id="shorten-form" class="flex flex-col gap-6">
+    <div class="flex flex-col gap-3">
+      <label
+        for="url-input"
+        class="font-mono text-xs font-bold tracking-widest text-black uppercase"
+      >
+        <span class="bg-[#E8F4F8] px-2 py-1">Wklej URL</span>
+      </label>
+      <input
+        type="url"
+        id="url-input"
+        name="url"
+        placeholder="https://www.twoja-strona.pl/z-bardzo-dlugim-linkiem"
+        class="h-[60px] w-full border-2 border-black bg-[#FAFAF8] px-4 font-mono text-black placeholder-gray-400 focus:border-black focus:ring-2 focus:ring-[#E8F4F8] focus:outline-none"
+      />
+      <p id="form-error" class="hidden font-mono text-sm text-red-600"></p>
+    </div>
+
+    <button
+      type="submit"
+      class="h-[60px] w-full border-2 border-black bg-black px-6 font-mono text-sm font-bold tracking-widest text-[#FAFAF8] uppercase transition-colors duration-100 hover:cursor-pointer hover:bg-[#E8F4F8] hover:text-black"
+    >
+      [ linkuj ]
+    </button>
+  </form>
+</div>
