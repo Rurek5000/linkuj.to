@@ -43,33 +43,135 @@ services:
       timeout: 5s
       retries: 5
 
-  api:
+  migrator:
     build:
       context: .
-      dockerfile: apps/api/Dockerfile
-    container_name: shortener-api
+      dockerfile: packages/db/Dockerfile
+    container_name: shortener-migrator
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
+  url-service:
+    build:
+      context: .
+      dockerfile: apps/url-service/Dockerfile
+    container_name: shortener-url-service
     restart: unless-stopped
     ports:
       - "3001:3001"
     environment:
       NODE_ENV: development
       PORT: 3001
+      BASE_URL: http://localhost:3000
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
       REDIS_URL: redis://redis:6379
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
     volumes:
-      - ./apps/api:/app/apps/api
+      - ./apps/url-service:/app/apps/url-service
       - ./packages:/app/packages
-      - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml
-      - ./package.json:/app/package.json
-      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml
-      - ./turbo.json:/app/turbo.json
       - /app/node_modules
-      - /app/apps/api/node_modules
+      - /app/apps/url-service/node_modules
+
+  redirect-service:
+    build:
+      context: .
+      dockerfile: apps/redirect-service/Dockerfile
+    container_name: shortener-redirect-service
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/redirect-service:/app/apps/redirect-service
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/redirect-service/node_modules
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: apps/analytics-service/Dockerfile
+    container_name: shortener-analytics-service
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      NODE_ENV: development
+      PORT: 3003
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/analytics-service:/app/apps/analytics-service
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/analytics-service/node_modules
+
+  management-service:
+    build:
+      context: .
+      dockerfile: apps/management-service/Dockerfile
+    container_name: shortener-management-service
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    environment:
+      NODE_ENV: development
+      PORT: 3004
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/management-service:/app/apps/management-service
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/management-service/node_modules
+
+  analytics-worker:
+    build:
+      context: .
+      dockerfile: apps/analytics-worker/Dockerfile
+    container_name: shortener-analytics-worker
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/analytics-worker:/app/apps/analytics-worker
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/analytics-worker/node_modules
 
   web:
     build:
@@ -81,9 +183,15 @@ services:
       - "4321:4321"
     environment:
       NODE_ENV: development
-      API_URL: http://api:3001
+      URL_SERVICE_URL: http://url-service:3001
+      REDIRECT_SERVICE_URL: http://redirect-service:3002
+      ANALYTICS_SERVICE_URL: http://analytics-service:3003
+      MANAGEMENT_SERVICE_URL: http://management-service:3004
     depends_on:
-      - api
+      - url-service
+      - redirect-service
+      - analytics-service
+      - management-service
     command: pnpm --filter web dev -- --host
     volumes:
       - ./apps/web:/app/apps/web

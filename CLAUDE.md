@@ -153,6 +153,7 @@ import { cacheService } from '@shortener/redis';
 - TypeScript strict mode is enabled
 - Prettier for code formatting - run `pnpm exec prettier . --write`
 - ESLint configured for TypeScript
+- Use ES6+ syntax: arrow functions, destructuring, template literals, `const`/`let`, spread operator, optional chaining (`?.`), nullish coalescing (`??`)
 
 ### Comments Policy
 

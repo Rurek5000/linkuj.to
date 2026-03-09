@@ -10,5 +10,13 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      proxy: {
+        '/api': {
+          target: process.env.URL_SERVICE_URL,
+          changeOrigin: true,
+        },
+      },
+    },
   },
 });

@@ -10,7 +10,7 @@
 **Zadania - Monorepo Setup:**
 - [x] Inicjalizacja monorepo (pnpm workspaces + Turborepo)
 - [x] Konfiguracja `turbo.json` (pipelines: build, dev, test, lint)
-- [x] Stworzenie struktury katalogów (`/apps/web`, `/apps/api`, `/packages/*`)
+- [x] Stworzenie struktury katalogów (`/apps/web`, `/apps/*-service`, `/packages/*`)
 - [x] Konfiguracja TypeScript (strict mode, path aliases)
 - [x] Setup `@shortener/shared` - typy, schematy Zod, utils
 - [x] Setup `@shortener/db` - Prisma/TypeORM, migracje, repozytoria
@@ -19,17 +19,22 @@
 **Zadania - Infrastruktura:**
 - [x] Konfiguracja Docker Compose (PostgreSQL, Redis, pgAdmin)
 - [x] Inicjalizacja projektu Astro 5 w `/apps/web`
-- [x] Inicjalizacja projektu Express w `/apps/api`
-- [ ] Schemat bazy danych (migracje w `@shortener/db`)
-- [ ] Konfiguracja workspace dependencies między pakietami
+- [x] Inicjalizacja mikrousług (5 serwisów):
+  - [x] `/apps/url-service` - POST /api/shorten (Port 3001)
+  - [x] `/apps/redirect-service` - GET /:short_code (Port 3002)
+  - [x] `/apps/analytics-service` - GET /api/analytics/:short_code (Port 3003)
+  - [x] `/apps/management-service` - DELETE /api/links/:short_code (Port 3004)
+  - [x] `/apps/analytics-worker` - CronJob (agregacja co 5 min)
+- [x] Schemat bazy danych (migracje w `@shortener/db`)
+- [x] Konfiguracja workspace dependencies między pakietami
 
 **Zadania - Serwis URL:**
-- [ ] Implementacja `generateShortCode()` w `@shortener/shared/utils`
-- [ ] Schematy Zod w `@shortener/shared/schemas` (LinkSchema)
-- [ ] Link repository w `@shortener/db`
-- [ ] Cache service w `@shortener/redis`
-- [ ] Endpoint POST /api/shorten w `/apps/api`
-- [ ] Obsługa kolizji short codes (retry logic)
+- [x] Implementacja `generateShortCode()` w `@shortener/shared/utils`
+- [x] Schematy Zod w `@shortener/shared/schemas` (LinkSchema)
+- [x] Link repository w `@shortener/db`
+- [x] Cache service w `@shortener/redis` (stub - queueService niezaimplementowany)
+- [x] Logika biznesowa w `/apps/url-service`
+- [x] Obsługa kolizji short codes (retry logic)
 
 **Rezultat:** Działające skracanie URL z pełną architekturą monorepo
 
