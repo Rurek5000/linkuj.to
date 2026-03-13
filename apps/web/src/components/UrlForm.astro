@@ -1,36 +1,47 @@
-<div class="mb-8 border-2 border-black bg-[#FAFAF8] p-8">
-  <form id="shorten-form" class="space-y-6">
-    <div>
-      <label
-        for="url-input"
-        class="mb-3 block font-mono text-xs font-bold tracking-widest text-black uppercase"
-      >
-        <span class="bg-[#E8F4F8] px-2 py-1">Wklej URL</span>
-      </label>
-      <input
-        type="url"
-        id="url-input"
-        name="url"
-        placeholder="https://www.twoja-strona.pl/z-bardzo-dlugim-linkiem"
-        class="w-full border-2 border-black bg-[#FAFAF8] px-4 py-4 font-mono text-black placeholder-gray-400 focus:border-black focus:ring-2 focus:ring-[#E8F4F8] focus:outline-none"
-      />
-    </div>
+---
+import UrlInputForm from "./UrlInputForm.astro";
+import ShortenResult from "./ShortenResult.astro";
+---
 
-    <p id="form-error" class="hidden font-mono text-sm text-red-600"></p>
-
-    <button
-      type="submit"
-      class="w-full border-2 border-black bg-black px-6 py-4 font-mono text-sm font-bold tracking-widest text-[#FAFAF8] uppercase transition-colors duration-100 hover:cursor-pointer hover:bg-[#E8F4F8] hover:text-black"
-    >
-      [ linkuj ]
-    </button>
-  </form>
-</div>
+<UrlInputForm />
+<ShortenResult />
 
 <script>
+  const formSection = document.getElementById("form-section") as HTMLDivElement;
+  const resultSection = document.getElementById(
+    "result-section",
+  ) as HTMLDivElement;
   const form = document.getElementById("shorten-form") as HTMLFormElement;
   const input = document.getElementById("url-input") as HTMLInputElement;
   const error = document.getElementById("form-error") as HTMLParagraphElement;
+  const shortUrlInput = document.getElementById(
+    "short-url-input",
+  ) as HTMLInputElement;
+  const copyBtn = document.getElementById("copy-btn") as HTMLButtonElement;
+  const copyIcon = document.getElementById(
+    "copy-icon",
+  ) as unknown as SVGElement;
+  const checkIcon = document.getElementById(
+    "check-icon",
+  ) as unknown as SVGElement;
+  const shortenAnother = document.getElementById(
+    "shorten-another",
+  ) as HTMLButtonElement;
+
+  if (
+    !formSection ||
+    !resultSection ||
+    !form ||
+    !input ||
+    !error ||
+    !shortUrlInput ||
+    !copyBtn ||
+    !copyIcon ||
+    !checkIcon ||
+    !shortenAnother
+  ) {
+    throw new Error("Required DOM elements not found");
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -39,14 +50,26 @@
     const url = input.value.trim();
     if (!url) return;
 
+    const turnstileResponse = document.querySelector<HTMLInputElement>(
+      '[name="cf-turnstile-response"]',
+    );
+    const turnstileToken = turnstileResponse?.value || "";
+
+    let data: { shortUrl?: string; error?: string };
     try {
       const res = await fetch("/api/shorten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, turnstileToken }),
       });
 
-      const data = await res.json();
+      try {
+        data = await res.json();
+      } catch {
+        error.textContent = "Błąd serwera: nieprawidłowa odpowiedź";
+        error.classList.remove("hidden");
+        return;
+      }
 
       if (!res.ok) {
         error.textContent = data.error || "Coś poszło nie tak";
@@ -54,11 +77,43 @@
         return;
       }
 
-      console.log("Response:", data);
-      alert(`Skrócony link: ${data.shortUrl}`);
-    } catch (err) {
+      if (!data.shortUrl) {
+        error.textContent = "Błąd: nie udało się wygenerować linku";
+        error.classList.remove("hidden");
+        return;
+      }
+
+      shortUrlInput.value = data.shortUrl;
+      formSection.classList.add("hidden");
+      resultSection.classList.remove("hidden");
+      resultSection.classList.add("flex");
+    } catch {
       error.textContent = "Nie udało się połączyć z serwerem";
       error.classList.remove("hidden");
+    }
+  });
+
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(shortUrlInput.value);
+      copyIcon.classList.add("hidden");
+      checkIcon.classList.remove("hidden");
+      setTimeout(() => {
+        copyIcon.classList.remove("hidden");
+        checkIcon.classList.add("hidden");
+      }, 2000);
+    } catch {
+      shortUrlInput.select();
+    }
+  });
+
+  shortenAnother.addEventListener("click", () => {
+    input.value = "";
+    resultSection.classList.remove("flex");
+    resultSection.classList.add("hidden");
+    formSection.classList.remove("hidden");
+    if ((window as any).turnstile) {
+      (window as any).turnstile.reset();
     }
   });
 </script>

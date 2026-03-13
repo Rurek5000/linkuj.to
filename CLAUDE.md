@@ -114,7 +114,7 @@ click_count, countries_json (JSONB)
 - All URLs auto-expire after 30 days (soft delete)
 - Raw events stored for 7 days, then deleted
 - Aggregated stats stored permanently
-- Short codes: 6 chars (a-z, A-Z, 0-9), check uniqueness, retry 3x on collision
+- Short codes: format `kolor-zwierze-czynnosc` (np. `czerwony-bobr-skacze`), ~9 900 kombinacji, VARCHAR(60), retry 3x on collision
 - IP addresses must be hashed (SHA-256) for GDPR compliance
 - Target performance: <500ms URL shortening, <100ms redirects (p95)
 
@@ -147,6 +147,17 @@ import { cacheService } from '@shortener/redis';
 - `@shortener/redis` - Redis cache and queue operations
 
 ## Code Style
+
+### Formatting
+
+**Always run Prettier after editing any frontend file:**
+```bash
+pnpm exec prettier apps/web/src/components/MyComponent.astro --write
+# or format all at once:
+pnpm exec prettier . --write
+```
+
+Prettier is configured at the repo root. Never skip this step after making changes to `.astro`, `.tsx`, `.ts` files.
 
 ### General Rules
 

@@ -8,6 +8,8 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@shortener/db": "workspace:*",
+    "@shortener/redis": "workspace:*",
     "express": "^5.2.1"
   },
   "devDependencies": {

@@ -2,25 +2,15 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import UrlForm from "../components/UrlForm.astro";
-import ShortenedUrlDisplay from "../components/ShortenedUrlDisplay.astro";
 import Footer from "../components/Footer.astro";
-
-let showResult = false;
 ---
 
 <Layout>
   <div class="min-h-screen bg-[#FAFAF8]">
     <Header />
-
-    <main class="container mx-auto px-4 max-w-4xl">
-      <!-- TODO: Add logic to show the result -->
-      {showResult ? (
-        <ShortenedUrlDisplay />
-      ) : (
-        <UrlForm />
-      )}
+    <main class="container mx-auto max-w-4xl px-4">
+      <UrlForm />
     </main>
-
     <Footer />
   </div>
 </Layout>
