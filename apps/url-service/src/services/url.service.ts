@@ -1,9 +1,14 @@
 import { linkRepository } from "@shortener/db";
 import { generateShortCode, MAX_RETRIES } from "@shortener/shared";
+import { UnsafeUrlError, ShortCodeCollisionError } from "../errors.js";
+import { isSafeUrl } from "./safe-browsing.service.js";
 
 const BASE_URL = process.env.BASE_URL;
 
 const createShortUrl = async (originalUrl: string) => {
+  const safe = await isSafeUrl(originalUrl);
+  if (!safe) throw new UnsafeUrlError();
+
   for (let i = 0; i < MAX_RETRIES; i++) {
     const shortCode = generateShortCode();
     try {
@@ -19,7 +24,7 @@ const createShortUrl = async (originalUrl: string) => {
       throw err;
     }
   }
-  throw new Error("Failed to generate unique short code");
+  throw new ShortCodeCollisionError();
 };
 
 export default createShortUrl;

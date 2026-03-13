@@ -1,3 +1,8 @@
+---
+const siteKey =
+  import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
+---
+
 <div
   id="form-section"
   class="flex flex-col gap-8 border-2 border-black bg-[#FAFAF8] p-8"
@@ -20,6 +25,14 @@
       <p id="form-error" class="hidden font-mono text-sm text-red-600"></p>
     </div>
 
+    <div
+      id="turnstile-widget"
+      class="cf-turnstile"
+      data-sitekey={siteKey}
+      data-theme="light"
+    >
+    </div>
+
     <button
       type="submit"
       class="h-[60px] w-full border-2 border-black bg-black px-6 font-mono text-sm font-bold tracking-widest text-[#FAFAF8] uppercase transition-colors duration-100 hover:cursor-pointer hover:bg-[#E8F4F8] hover:text-black"
@@ -28,3 +41,9 @@
     </button>
   </form>
 </div>
+
+<script
+  is:inline
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  async
+  defer></script>

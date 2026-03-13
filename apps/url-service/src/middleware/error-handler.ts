@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { UnsafeUrlError, ShortCodeCollisionError } from "../errors.js";
 
 const errorHandler = (
   err: Error,
@@ -8,10 +9,15 @@ const errorHandler = (
 ) => {
   console.error(`[url-service] ${req.method} ${req.path}:`, err.message);
 
-  if (err.message.includes("Failed to generate unique short code")) {
+  if (err instanceof ShortCodeCollisionError) {
     res
       .status(503)
       .json({ error: "Service temporarily unavailable. Please try again." });
+    return;
+  }
+
+  if (err instanceof UnsafeUrlError) {
+    res.status(400).json({ error: "This URL has been flagged as unsafe." });
     return;
   }
 

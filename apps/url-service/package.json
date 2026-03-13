@@ -11,6 +11,7 @@
     "@shortener/db": "workspace:*",
     "@shortener/shared": "workspace:*",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.3.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {

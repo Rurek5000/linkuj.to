@@ -10,6 +10,9 @@ COPY apps/redirect-service ./apps/redirect-service
 
 RUN pnpm install --frozen-lockfile
 
+RUN pnpm --filter @shortener/shared build
+RUN pnpm --filter @shortener/db build
+RUN pnpm --filter @shortener/redis build
 RUN pnpm --filter @shortener/redirect-service build
 
 FROM node:25-alpine3.22 AS runner

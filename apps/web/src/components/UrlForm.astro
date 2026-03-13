@@ -50,12 +50,17 @@ import ShortenResult from "./ShortenResult.astro";
     const url = input.value.trim();
     if (!url) return;
 
+    const turnstileResponse = document.querySelector<HTMLInputElement>(
+      '[name="cf-turnstile-response"]',
+    );
+    const turnstileToken = turnstileResponse?.value || "";
+
     let data: { shortUrl?: string; error?: string };
     try {
       const res = await fetch("/api/shorten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, turnstileToken }),
       });
 
       try {
@@ -107,5 +112,8 @@ import ShortenResult from "./ShortenResult.astro";
     resultSection.classList.remove("flex");
     resultSection.classList.add("hidden");
     formSection.classList.remove("hidden");
+    if ((window as any).turnstile) {
+      (window as any).turnstile.reset();
+    }
   });
 </script>
