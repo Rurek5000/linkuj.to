@@ -11,6 +11,10 @@ COPY apps/web ./apps/web
 RUN pnpm install --frozen-lockfile
 
 RUN pnpm --filter @shortener/shared build
+
+ARG PUBLIC_TURNSTILE_SITE_KEY
+ENV PUBLIC_TURNSTILE_SITE_KEY=$PUBLIC_TURNSTILE_SITE_KEY
+
 RUN pnpm --filter web build
 
 FROM nginx:alpine AS runner
