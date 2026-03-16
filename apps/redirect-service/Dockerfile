@@ -15,7 +15,6 @@ RUN pnpm --filter @shortener/db build
 RUN pnpm --filter @shortener/redis build
 RUN pnpm --filter @shortener/redirect-service build
 
-RUN CI=true pnpm prune --prod
 
 FROM node:25-alpine AS runner
 
