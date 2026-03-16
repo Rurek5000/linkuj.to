@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrator
+  namespace: shortener
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: migrator
+          image: ghcr.io/rurek5000/shortener-migrator:latest
+          env:
+            - name: DATABASE_URL
+              value: postgresql://postgres:postgres@postgres:5432/shortener

@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redirect-service
+  namespace: shortener
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redirect-service
+  template:
+    metadata:
+      labels:
+        app: redirect-service
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: redirect-service
+          image: ghcr.io/rurek5000/shortener-redirect-service:latest
+          ports:
+            - containerPort: 3002
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: shortener-config
+                  key: NODE_ENV
+            - name: FRONTEND_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: shortener-config
+                  key: FRONTEND_URL
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shortener-secrets
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shortener-secrets
+                  key: REDIS_URL
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redirect-service
+  namespace: shortener
+spec:
+  selector:
+    app: redirect-service
+  ports:
+    - port: 3002
+      targetPort: 3002
