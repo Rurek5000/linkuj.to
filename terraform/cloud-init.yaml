@@ -1,0 +1,16 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - curl
+  - ca-certificates
+
+runcmd:
+  - curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --disable traefik" sh -
+  - systemctl enable k3s
+  - mkdir -p /home/ubuntu/.kube
+  - cp /etc/rancher/k3s/k3s.yaml /home/ubuntu/.kube/config
+  - chown -R ubuntu:ubuntu /home/ubuntu/.kube
+  - sed -i 's/127.0.0.1/192.168.0.100/g' /home/ubuntu/.kube/config

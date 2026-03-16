@@ -1,0 +1,107 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: shortener-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: shortener
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8-alpine
+    container_name: shortener-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  migrator:
+    build:
+      context: .
+      dockerfile: packages/db/Dockerfile
+    container_name: shortener-migrator
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
+  url-service:
+    build:
+      context: .
+      dockerfile: apps/url-service/Dockerfile
+    container_name: shortener-url-service
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      BASE_URL: http://localhost:3002
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
+      REDIS_URL: redis://redis:6379
+      GOOGLE_SAFE_BROWSING_API_KEY: ${GOOGLE_SAFE_BROWSING_API_KEY}
+      CLOUDFLARE_TURNSTILE_SECRET_KEY: ${CLOUDFLARE_TURNSTILE_SECRET_KEY:-1x0000000000000000000000000000000AA}
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  redirect-service:
+    build:
+      context: .
+      dockerfile: apps/redirect-service/Dockerfile
+    container_name: shortener-redirect-service
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
+      REDIS_URL: redis://redis:6379
+      FRONTEND_URL: http://localhost:4321
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: shortener-web
+    restart: unless-stopped
+    ports:
+      - "4321:4321"
+    environment:
+      NODE_ENV: development
+      URL_SERVICE_URL: http://url-service:3001
+      REDIRECT_SERVICE_URL: http://redirect-service:3002
+    depends_on:
+      - url-service
+      - redirect-service
+
+volumes:
+  postgres_data:
+  redis_data:

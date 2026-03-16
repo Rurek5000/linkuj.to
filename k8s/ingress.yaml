@@ -1,0 +1,27 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: shortener-routes
+  namespace: shortener
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: PathPrefix(`/api`)
+      kind: Rule
+      priority: 20
+      services:
+        - name: url-service
+          port: 3001
+    - match: PathRegexp(`^/[a-z]+-[a-z]+-[a-z]+$`)
+      kind: Rule
+      priority: 10
+      services:
+        - name: redirect-service
+          port: 3002
+    - match: PathPrefix(`/`)
+      kind: Rule
+      priority: 1
+      services:
+        - name: web
+          port: 80

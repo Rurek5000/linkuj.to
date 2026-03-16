@@ -1,0 +1,37 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout>
+  <div class="min-h-screen bg-[#FAFAF8]">
+    <Header />
+
+    <main class="container mx-auto max-w-4xl px-4">
+      <div class="flex flex-col items-center justify-center py-24">
+        <span
+          class="bg-[#E8F4F8] px-3 py-1 font-mono text-xs tracking-widest uppercase"
+        >
+          500
+        </span>
+        <div class="mt-3 flex flex-col items-center gap-2">
+          <h1 class="font-mono text-3xl font-bold text-black">
+            Coś poszło nie tak
+          </h1>
+          <p class="text-center font-mono text-gray-500">
+            Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.
+          </p>
+        </div>
+        <a
+          href="/"
+          class="mt-12 flex h-[60px] items-center border-2 border-black bg-black px-8 font-mono text-xs tracking-widest text-[#FAFAF8] uppercase transition-colors hover:bg-[#E8F4F8] hover:text-black"
+        >
+          Skróć nowy link
+        </a>
+      </div>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>

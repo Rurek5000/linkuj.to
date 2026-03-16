@@ -457,7 +457,7 @@ const rateLimiter = {
 **Wymagane:**
 ```bash
 # Baza danych
-DATABASE_URL=postgresql://user:password@localhost:5432/shortener
+DATABASE_URL=postgresql://user:password@localhost:5433/shortener
 
 # Redis
 REDIS_URL=redis://localhost:6379

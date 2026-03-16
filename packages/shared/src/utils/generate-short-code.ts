@@ -1,10 +1,81 @@
-import { SHORT_CODE_LENGTH } from '../constants';
+const COLORS = [
+  "czerwony",
+  "niebieski",
+  "zielony",
+  "zolty",
+  "fioletowy",
+  "pomaranczowy",
+  "rozowy",
+  "brazowy",
+  "szary",
+  "czarny",
+  "bialy",
+  "turkusowy",
+  "zloty",
+  "srebrny",
+  "granatowy",
+  "bordowy",
+  "bezowy",
+  "oliwkowy",
+  "karmazynowy",
+  "lazurowy",
+];
 
-export function generateShortCode(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < SHORT_CODE_LENGTH; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
-}
+const ANIMALS = [
+  "bobr",
+  "zubr",
+  "los",
+  "dzik",
+  "lis",
+  "wilk",
+  "niedzwiedz",
+  "jelen",
+  "sarna",
+  "borsuk",
+  "wydra",
+  "zajac",
+  "wiewiorka",
+  "jez",
+  "bocian",
+  "orzel",
+  "sokol",
+  "sowa",
+  "kruk",
+  "zuraw",
+  "bazant",
+  "szczupak",
+  "sum",
+  "rys",
+  "zmija",
+];
+
+const ACTIVITIES = [
+  "skacze",
+  "biega",
+  "spiewa",
+  "tanczy",
+  "plywa",
+  "lata",
+  "spi",
+  "je",
+  "gra",
+  "czyta",
+  "gotuje",
+  "rysuje",
+  "ryczy",
+  "warczy",
+  "nurkuje",
+  "chodzi",
+  "weszy",
+  "drzemie",
+];
+
+const pick = (arr: string[]): string => {
+  return arr[Math.floor(Math.random() * arr.length)];
+};
+
+const generateShortCode = (): string => {
+  return `${pick(COLORS)}-${pick(ANIMALS)}-${pick(ACTIVITIES)}`;
+};
+
+export { generateShortCode };

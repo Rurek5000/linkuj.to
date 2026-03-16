@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: url-service
+  namespace: shortener
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: url-service
+  template:
+    metadata:
+      labels:
+        app: url-service
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: url-service
+          image: ghcr.io/rurek5000/shortener-url-service:latest
+          ports:
+            - containerPort: 3001
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: shortener-config
+                  key: NODE_ENV
+            - name: BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: shortener-config
+                  key: BASE_URL
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shortener-secrets
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shortener-secrets
+                  key: REDIS_URL
+            - name: GOOGLE_SAFE_BROWSING_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: shortener-secrets
+                  key: GOOGLE_SAFE_BROWSING_API_KEY
+            - name: CLOUDFLARE_TURNSTILE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: shortener-secrets
+                  key: CLOUDFLARE_TURNSTILE_SECRET_KEY
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: url-service
+  namespace: shortener
+spec:
+  selector:
+    app: url-service
+  ports:
+    - port: 3001
+      targetPort: 3001

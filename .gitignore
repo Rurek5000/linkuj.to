@@ -44,3 +44,15 @@ coverage/
 # Temp
 *.tsbuildinfo
 .cache/
+docs/temp/
+
+# Kubernetes secrets
+k8s/secrets.yaml
+
+# Terraform
+terraform/.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/terraform.tfvars
+terraform/*.tfvars
+terraform/*.tfvars.json

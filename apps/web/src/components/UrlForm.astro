@@ -1,0 +1,119 @@
+---
+import UrlInputForm from "./UrlInputForm.astro";
+import ShortenResult from "./ShortenResult.astro";
+---
+
+<UrlInputForm />
+<ShortenResult />
+
+<script>
+  const formSection = document.getElementById("form-section") as HTMLDivElement;
+  const resultSection = document.getElementById(
+    "result-section",
+  ) as HTMLDivElement;
+  const form = document.getElementById("shorten-form") as HTMLFormElement;
+  const input = document.getElementById("url-input") as HTMLInputElement;
+  const error = document.getElementById("form-error") as HTMLParagraphElement;
+  const shortUrlInput = document.getElementById(
+    "short-url-input",
+  ) as HTMLInputElement;
+  const copyBtn = document.getElementById("copy-btn") as HTMLButtonElement;
+  const copyIcon = document.getElementById(
+    "copy-icon",
+  ) as unknown as SVGElement;
+  const checkIcon = document.getElementById(
+    "check-icon",
+  ) as unknown as SVGElement;
+  const shortenAnother = document.getElementById(
+    "shorten-another",
+  ) as HTMLButtonElement;
+
+  if (
+    !formSection ||
+    !resultSection ||
+    !form ||
+    !input ||
+    !error ||
+    !shortUrlInput ||
+    !copyBtn ||
+    !copyIcon ||
+    !checkIcon ||
+    !shortenAnother
+  ) {
+    throw new Error("Required DOM elements not found");
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    error.classList.add("hidden");
+
+    const url = input.value.trim();
+    if (!url) return;
+
+    const turnstileResponse = document.querySelector<HTMLInputElement>(
+      '[name="cf-turnstile-response"]',
+    );
+    const turnstileToken = turnstileResponse?.value || "";
+
+    let data: { shortUrl?: string; error?: string };
+    try {
+      const res = await fetch("/api/shorten", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, turnstileToken }),
+      });
+
+      try {
+        data = await res.json();
+      } catch {
+        error.textContent = "Błąd serwera: nieprawidłowa odpowiedź";
+        error.classList.remove("hidden");
+        return;
+      }
+
+      if (!res.ok) {
+        error.textContent = data.error || "Coś poszło nie tak";
+        error.classList.remove("hidden");
+        return;
+      }
+
+      if (!data.shortUrl) {
+        error.textContent = "Błąd: nie udało się wygenerować linku";
+        error.classList.remove("hidden");
+        return;
+      }
+
+      shortUrlInput.value = data.shortUrl;
+      formSection.classList.add("hidden");
+      resultSection.classList.remove("hidden");
+      resultSection.classList.add("flex");
+    } catch {
+      error.textContent = "Nie udało się połączyć z serwerem";
+      error.classList.remove("hidden");
+    }
+  });
+
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(shortUrlInput.value);
+      copyIcon.classList.add("hidden");
+      checkIcon.classList.remove("hidden");
+      setTimeout(() => {
+        copyIcon.classList.remove("hidden");
+        checkIcon.classList.add("hidden");
+      }, 2000);
+    } catch {
+      shortUrlInput.select();
+    }
+  });
+
+  shortenAnother.addEventListener("click", () => {
+    input.value = "";
+    resultSection.classList.remove("flex");
+    resultSection.classList.add("hidden");
+    formSection.classList.remove("hidden");
+    if ((window as any).turnstile) {
+      (window as any).turnstile.reset();
+    }
+  });
+</script>
