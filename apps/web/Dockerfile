@@ -1,6 +1,6 @@
-FROM node:25-alpine3.22 AS builder
+FROM node:25-alpine AS builder
 
-RUN yarn global add pnpm@latest
+RUN npm install -g pnpm@10.32.1
 
 WORKDIR /app
 
@@ -11,22 +11,11 @@ COPY apps/web ./apps/web
 RUN pnpm install --frozen-lockfile
 
 RUN pnpm --filter @shortener/shared build
-
 RUN pnpm --filter web build
 
-FROM node:25-alpine3.22 AS runner
+FROM nginx:alpine AS runner
 
-RUN yarn global add pnpm@latest
+COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
+COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 
-WORKDIR /app
-
-COPY --from=builder /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml /app/turbo.json ./
-COPY --from=builder /app/apps/web ./apps/web
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/node_modules ./node_modules
-
-# USER node # Disabled for development (permission issues with .astro and .vite)
-
-EXPOSE 4321
-
-CMD ["pnpm", "--filter", "web", "dev"]
+EXPOSE 80

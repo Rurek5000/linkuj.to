@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:18.1-alpine3.23
+    image: postgres:18-alpine
     container_name: shortener-db
     restart: unless-stopped
     environment:
@@ -17,19 +17,8 @@ services:
       timeout: 5s
       retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: shortener-pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-
   redis:
-    image: redis:8.6-rc1-alpine
+    image: redis:8-alpine
     container_name: shortener-redis
     restart: unless-stopped
     ports:
@@ -64,7 +53,7 @@ services:
     ports:
       - "3001:3001"
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: 3001
       BASE_URL: http://localhost:3002
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
@@ -76,11 +65,6 @@ services:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
-    volumes:
-      - ./apps/url-service:/app/apps/url-service
-      - ./packages:/app/packages
-      - /app/node_modules
-      - /app/apps/url-service/node_modules
 
   redirect-service:
     build:
@@ -91,7 +75,7 @@ services:
     ports:
       - "3002:3002"
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: 3002
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
       REDIS_URL: redis://redis:6379
@@ -101,80 +85,6 @@ services:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
-    volumes:
-      - ./apps/redirect-service:/app/apps/redirect-service
-      - ./packages:/app/packages
-      - /app/node_modules
-      - /app/apps/redirect-service/node_modules
-
-  analytics-service:
-    build:
-      context: .
-      dockerfile: apps/analytics-service/Dockerfile
-    container_name: shortener-analytics-service
-    restart: unless-stopped
-    ports:
-      - "3003:3003"
-    environment:
-      NODE_ENV: development
-      PORT: 3003
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
-      REDIS_URL: redis://redis:6379
-    depends_on:
-      migrator:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./apps/analytics-service:/app/apps/analytics-service
-      - ./packages:/app/packages
-      - /app/node_modules
-      - /app/apps/analytics-service/node_modules
-
-  management-service:
-    build:
-      context: .
-      dockerfile: apps/management-service/Dockerfile
-    container_name: shortener-management-service
-    restart: unless-stopped
-    ports:
-      - "3004:3004"
-    environment:
-      NODE_ENV: development
-      PORT: 3004
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
-      REDIS_URL: redis://redis:6379
-    depends_on:
-      migrator:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./apps/management-service:/app/apps/management-service
-      - ./packages:/app/packages
-      - /app/node_modules
-      - /app/apps/management-service/node_modules
-
-  analytics-worker:
-    build:
-      context: .
-      dockerfile: apps/analytics-worker/Dockerfile
-    container_name: shortener-analytics-worker
-    restart: unless-stopped
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/shortener
-      REDIS_URL: redis://redis:6379
-    depends_on:
-      migrator:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./apps/analytics-worker:/app/apps/analytics-worker
-      - ./packages:/app/packages
-      - /app/node_modules
-      - /app/apps/analytics-worker/node_modules
 
   web:
     build:
@@ -188,21 +98,9 @@ services:
       NODE_ENV: development
       URL_SERVICE_URL: http://url-service:3001
       REDIRECT_SERVICE_URL: http://redirect-service:3002
-      ANALYTICS_SERVICE_URL: http://analytics-service:3003
-      MANAGEMENT_SERVICE_URL: http://management-service:3004
     depends_on:
       - url-service
       - redirect-service
-      - analytics-service
-      - management-service
-    command: pnpm --filter web dev -- --host
-    volumes:
-      - ./apps/web:/app/apps/web
-      - ./packages:/app/packages
-      - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml
-      - ./package.json:/app/package.json
-      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml
-      - /app/node_modules
 
 volumes:
   postgres_data:

@@ -1,8 +1,10 @@
 import express from 'express';
+import helmet from 'helmet';
 
 const app = express();
 const PORT = process.env.PORT || 3003;
 
+app.use(helmet());
 app.use(express.json());
 
 app.get('/api/analytics/:short_code', async (req, res) => {

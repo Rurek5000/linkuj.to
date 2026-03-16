@@ -1,6 +1,6 @@
-FROM node:25-alpine3.22
+FROM node:25-alpine
 
-RUN yarn global add pnpm@latest
+RUN npm install -g pnpm@10.32.1
 
 WORKDIR /app
 

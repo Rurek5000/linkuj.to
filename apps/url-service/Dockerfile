@@ -1,6 +1,6 @@
-FROM node:25-alpine3.22 AS builder
+FROM node:25-alpine AS builder
 
-RUN yarn global add pnpm@latest
+RUN npm install -g pnpm@10.32.1
 
 WORKDIR /app
 
@@ -14,17 +14,19 @@ RUN pnpm --filter @shortener/shared build
 RUN pnpm --filter @shortener/db build
 RUN pnpm --filter @shortener/url-service build
 
-FROM node:25-alpine3.22 AS runner
+RUN CI=true pnpm prune --prod
 
-RUN yarn global add pnpm@latest
+FROM node:25-alpine AS runner
 
 WORKDIR /app
 
-COPY --from=builder /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml /app/turbo.json ./
-COPY --from=builder /app/apps/url-service ./apps/url-service
+COPY --from=builder /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./
+COPY --from=builder /app/apps/url-service/dist ./apps/url-service/dist
+COPY --from=builder /app/apps/url-service/package.json ./apps/url-service/package.json
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/url-service/node_modules ./apps/url-service/node_modules
 
 EXPOSE 3001
 
-CMD ["pnpm", "--filter", "@shortener/url-service", "dev"]
+CMD ["node", "apps/url-service/dist/index.js"]

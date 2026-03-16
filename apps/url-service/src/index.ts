@@ -1,4 +1,5 @@
 import express from "express";
+import helmet from "helmet";
 import shortenRouter from "./routes/shorten.route.js";
 import errorHandler from "./middleware/error-handler.js";
 import rateLimiter from "./middleware/rate-limiter.js";
@@ -11,6 +12,7 @@ if (!process.env.BASE_URL) {
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+app.use(helmet());
 app.use(express.json());
 
 app.get("/health", (req, res) => {
