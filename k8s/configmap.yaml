@@ -5,7 +5,7 @@ metadata:
   namespace: shortener
 data:
   NODE_ENV: production
-  BASE_URL: http://192.168.0.100
+  BASE_URL: http://linkuj.rurek.org/
   FRONTEND_URL: http://web:80
   URL_SERVICE_URL: http://url-service:3001
   REDIRECT_SERVICE_URL: http://redirect-service:3002
