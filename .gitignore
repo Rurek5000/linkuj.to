@@ -46,6 +46,9 @@ coverage/
 .cache/
 docs/temp/
 
+# Kubernetes secrets
+k8s/secrets.yaml
+
 # Terraform
 terraform/.terraform/
 terraform/terraform.tfstate

@@ -14,7 +14,6 @@ RUN pnpm --filter @shortener/shared build
 RUN pnpm --filter @shortener/db build
 RUN pnpm --filter @shortener/url-service build
 
-RUN CI=true pnpm prune --prod
 
 FROM node:25-alpine AS runner
 
